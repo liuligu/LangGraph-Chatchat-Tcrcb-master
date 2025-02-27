@@ -1,0 +1,18 @@
+node=None metadata={
+  'thread_id': 123456789,
+  'langgraph_step': 2,
+  'langgraph_node': 'chatbot',
+  'langgraph_triggers': [
+    'history_manager'
+  ],
+  'langgraph_path': (
+  '__pregel_pull',
+  'chatbot'
+  ),
+  'langgraph_checkpoint_ns': 'chatbot:d12e22d0-03e8-ae04-e8be-dbe04c8a1278',
+  'checkpoint_ns': 'chatbot:d12e22d0-03e8-ae04-e8be-dbe04c8a1278',
+  'ls_provider': 'openai',
+  'ls_model_name': 'gpt-3.5-turbo',
+  'ls_model_type': 'chat',
+  'ls_temperature': 0.7
+} messages=AIMessageChunk(content='更多', additional_kwargs={}, response_metadata={}, id='run-82128163-05fc-4447-b279-acdd4609ff00')
