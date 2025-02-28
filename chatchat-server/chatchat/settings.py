@@ -551,7 +551,7 @@ class ToolSettings(BaseFileSettings):
     """
     RECURSION_LIMIT: int = 50
 
-    GRAPH_MEMORY_TYPE: t.Literal["memory", "sqlite", "postgres"] = "sqlite"
+    GRAPH_MEMORY_TYPE: t.Literal["memory", "sqlite", "postgres"] = "postgres"
     """
     langgraph 历史记录类型。
     如果设为 memory, 无法持久化，仅在程序运行期间用于获取历史消息。

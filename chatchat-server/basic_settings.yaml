@@ -19,14 +19,13 @@ KB_ROOT_PATH: E:\LangGraph-Chatchat-master\chatchat-server\data\knowledge_base
 DB_ROOT_PATH: E:\LangGraph-Chatchat-master\chatchat-server\data\knowledge_base\info.db
 
 # 知识库信息数据库连接URI
-SQLALCHEMY_DATABASE_URI: 
-  sqlite:///E:\LangGraph-Chatchat-master\chatchat-server\data\knowledge_base\info.db
+SQLALCHEMY_DATABASE_URI: postgresql://postgres:chatchat@127.0.0.1:5432/langgraph_chatchat
 
 # 工作流 SQLITE CHECKPOINT 数据库连接URI
-SQLITE_GRAPH_DATABASE_URI: E:\LangGraph-Chatchat-master\chatchat-server\data\graph.db
+SQLITE_GRAPH_DATABASE_URI: postgresql://postgres:chatchat@127.0.0.1:5432/langgraph_chatchat
 
 # 工作流 POSTGRESQL CHECKPOINT 数据库连接URI
-POSTGRESQL_GRAPH_DATABASE_URI: postgresql://username:password@localhost:5442/langgraph_chatchat
+POSTGRESQL_GRAPH_DATABASE_URI: postgresql://postgres:chatchat@127.0.0.1:5432/langgraph_chatchat
 
 # 工作流 POSTGRESQL CHECKPOINT 数据库连接池最大连接数限制
 POSTGRESQL_GRAPH_CONNECTION_POOLS_MAX_SIZE: 20

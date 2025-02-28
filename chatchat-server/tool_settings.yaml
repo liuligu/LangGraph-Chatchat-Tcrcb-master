@@ -10,7 +10,7 @@ RECURSION_LIMIT: 50
 # POSTGRESQL_GRAPH_CONNECTION_POOLS_MAX_SIZE
 # POSTGRESQL_GRAPH_CONNECTION_POOLS_KWARGS 等配置
 # 可选值：['memory', 'sqlite', 'postgres']
-GRAPH_MEMORY_TYPE: sqlite
+GRAPH_MEMORY_TYPE: postgres
 search_internet:
   use: false
   search_engine_name: duckduckgo
