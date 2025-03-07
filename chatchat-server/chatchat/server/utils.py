@@ -1,4 +1,5 @@
 import os
+import asyncio
 import requests
 import httpx
 import openai
@@ -15,7 +16,7 @@ from typing import (
     Literal,
     Optional,
     Tuple,
-    Union,
+    Union, Awaitable,
 )
 
 import streamlit
@@ -32,6 +33,17 @@ from chatchat.utils import build_logger
 
 logger = build_logger()
 
+
+async def wrap_done(fn: Awaitable, event: asyncio.Event):
+    """Wrap an awaitable with a event to signal when it's done or an exception is raised."""
+    try:
+        await fn
+    except Exception as e:
+        msg = f"Caught exception: {e}"
+        logger.error(f"{e.__class__.__name__}: {msg}")
+    finally:
+        # Signal the aiter to stop.
+        event.set()
 
 def get_base_url(url):
     parsed_url = urlparse(url)  # 解析url
@@ -523,18 +535,6 @@ def webui_address() -> str:
     port = Settings.basic_settings.WEBUI_SERVER["port"]
     return f"http://{host}:{port}"
 
-
-# def get_prompt_template(type: str, name: str) -> Optional[str]:
-#     """
-#     从prompt_config中加载模板内容
-#     type: 对应于 model_settings.llm_model_config 模型类别其中的一种，以及 "rag"，如果有新功能，应该进行加入。
-#     """
-#
-#     from chatchat.settings import Settings
-#
-#     return Settings.prompt_settings.model_dump().get(type, {}).get(name)
-
-
 def set_httpx_config(
         timeout: float = Settings.basic_settings.HTTPX_DEFAULT_TIMEOUT,
         proxy: Union[str, Dict] = None,
@@ -851,6 +851,54 @@ def add_tools_if_not_exists(
             tools_provides_list.append(tool)  # 更新列表
     return tools_provides
 
+def get_OpenAIClient(
+        platform_name: str = None,
+        model_name: str = None,
+        is_async: bool = True,
+) -> Union[openai.Client, openai.AsyncClient]:
+    """
+    construct an openai Client for specified platform or model
+    """
+    if platform_name is None:
+        platform_info = get_model_info(
+            model_name=model_name, platform_name=platform_name
+        )
+        if platform_info is None:
+            raise RuntimeError(
+                f"cannot find configured platform for model: {model_name}"
+            )
+        platform_name = platform_info.get("platform_name")
+    platform_info = get_config_platforms().get(platform_name)
+    assert platform_info, f"cannot find configured platform: {platform_name}"
+    params = {
+        "base_url": platform_info.get("api_base_url"),
+        "api_key": platform_info.get("api_key"),
+    }
+    httpx_params = {}
+    if api_proxy := platform_info.get("api_proxy"):
+        httpx_params = {
+            "proxies": api_proxy,
+            "transport": httpx.HTTPTransport(local_address="0.0.0.0"),
+        }
+
+    if is_async:
+        if httpx_params:
+            params["http_client"] = httpx.AsyncClient(**httpx_params)
+        return openai.AsyncClient(**params)
+    else:
+        if httpx_params:
+            params["http_client"] = httpx.Client(**httpx_params)
+        return openai.Client(**params)
+
+def get_prompt_template(type: str, name: str) -> Optional[str]:
+    """
+    从prompt_config中加载模板内容
+    type: 对应于 model_settings.llm_model_config 模型类别其中的一种，以及 "rag"，如果有新功能，应该进行加入。
+    """
+
+    from chatchat.settings import Settings
+
+    return Settings.prompt_settings.model_dump().get(type, {}).get(name)
 
 if __name__ == "__main__":
     # for debug

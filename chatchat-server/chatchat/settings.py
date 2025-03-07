@@ -354,6 +354,8 @@ class ApiModelSettings(BaseFileSettings):
     TEMPERATURE: float = 0.7
     """LLM通用对话参数"""
 
+    MAX_TOKENS: int = 2048
+
     # # 新增重排序模型
     # USE_RERANKER: bool = False
     # """是否使用重排模型"""

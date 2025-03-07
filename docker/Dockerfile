@@ -27,7 +27,7 @@ RUN pip install --index-url https://pypi.python.org/simple/ pipx && \
 ENV PATH="/root/.local/bin:${PATH}"
 
 # 下载 LangGraph-Chatchat
-RUN git clone https://github.com/chatchat-space/LangGraph-Chatchat.git
+#RUN git clone https://github.com/chatchat-space/LangGraph-Chatchat.git
 
 # 安装依赖
 WORKDIR /root/LangGraph-Chatchat/chatchat-server
@@ -44,7 +44,7 @@ WORKDIR /root/LangGraph-Chatchat/chatchat-server/chatchat
 #RUN python cli.py init
 
 ## 初始化知识库文件
-#ADD chatchat_data.tar.gz $CHATCHAT_ROOT/
+ADD chatchat_data.tar.gz $CHATCHAT_ROOT/
 
 EXPOSE 7861 8501
 ENTRYPOINT ["python", "cli.py", "start", "-a"]

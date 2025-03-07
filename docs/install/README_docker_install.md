@@ -84,10 +84,10 @@ MODEL_PLATFORMS:
   需要根据选用的模型推理框架与加载的模型进行模型接入配置，具体参考 `model_settings.yaml` 中的注释。主要修改以下内容：
   ```yaml
   # 默认选用的 LLM 名称
-   DEFAULT_LLM_MODEL: qwen2.5-instruct
+   DEFAULT_LLM_MODEL: gpt-3.5-turbo
 
    # 默认选用的 Embedding 名称
-   DEFAULT_EMBEDDING_MODEL: bge-large-zh-v1.5
+   DEFAULT_EMBEDDING_MODEL: text-embedding-3-small
 
   # 将 `LLM_MODEL_CONFIG` 中 `llm_model, action_model` 的键改成对应的 LLM 模型
   # 在 `MODEL_PLATFORMS` 中修改对应模型平台信息
@@ -165,16 +165,16 @@ root-xinference-1   chatchatspace/xinference:qwen2.5-2024-1117                  
 ```
 
 ## 六、启动模型
-- 登陆 `Xinference` 容器, 并启动 `LLM` (`qwen2.5-instruct`) 和 `Embedding Model` (`bge-large-zh-v1.5`)
+- 登陆 `Xinference` 容器, 并启动 `LLM` (`gpt-3.5-turbo`) 和 `Embedding Model` (`text-embedding-3-small`)
 ```shell
 (x) [root@VM-128-14-tencentos ~]$ docker-compose exec -ti xinference bash
 WARN[0000] /root/docker-compose.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
-root@fd17a68b7c33:/opt/inference$ xinference launch --model-engine Transformers --model-name qwen2.5-instruct --size-in-billions 7 --model-format pytorch --quantization none
-Launch model name: qwen2.5-instruct with kwargs: {}
-Model uid: qwen2.5-instruct
-root@fd17a68b7c33:/opt/inference$ xinference launch --model-name bge-large-zh-v1.5 --model-type embedding
-Launch model name: bge-large-zh-v1.5 with kwargs: {}
-Model uid: bge-large-zh-v1.5
+root@fd17a68b7c33:/opt/inference$ xinference launch --model-engine Transformers --model-name gpt-3.5-turbo --size-in-billions 7 --model-format pytorch --quantization none
+Launch model name: gpt-3.5-turbo with kwargs: {}
+Model uid: gpt-3.5-turbo
+root@fd17a68b7c33:/opt/inference$ xinference launch --model-name text-embedding-3-small --model-type embedding
+Launch model name: text-embedding-3-small with kwargs: {}
+Model uid: text-embedding-3-small
 root@fd17a68b7c33:/opt/inference$ exit
 exit
 ```
@@ -182,17 +182,17 @@ exit
 - 浏览器访问 `http://<你机器的ip>:9997`
 
 
-- 查看 `qwen2.5-instruct` 启动情况:
+- 查看 `gpt-3.5-turbo` 启动情况:
 
-![查看llm启动情况](../../docs/img/xinference-qwen2.5-instruct.png)
+![查看llm启动情况](../../docs/img/xinference-gpt-3.5-turbo.png)
 
-- 与 `qwen2.5-instruct` 进行对话:
+- 与 `gpt-3.5-turbo` 进行对话:
 
 ![llm对话](../../docs/img/xinference-llm-chat.png)
 
-- 查看 `bge-large-zh-v1.5` 启动情况:
+- 查看 `text-embedding-3-small` 启动情况:
 
-![查看embedding启动情况](../../docs/img/xinference-bge-large-zh-v1.5.png)
+![查看embedding启动情况](../../docs/img/xinference-text-embedding-3-small.png)
 
 ## 七、访问 `LangGraph-Chatchat` 前端
 

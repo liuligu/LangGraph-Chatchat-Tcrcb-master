@@ -5,10 +5,49 @@ import time
 
 from typing import Dict, List, Literal, Optional, Union, Any
 from pydantic import BaseModel, Field
-from openai.types.chat import ChatCompletionMessageParam
 
 from chatchat.settings import Settings
 from chatchat.server.utils import MsgType, get_default_llm
+from openai.types.chat import (
+    ChatCompletionMessageParam,
+    ChatCompletionToolChoiceOptionParam,
+    ChatCompletionToolParam,
+    completion_create_params,
+)
+
+class OpenAIBaseInput(BaseModel):
+    user: Optional[str] = None
+    # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+    # The extra values given here take precedence over values defined on the client or passed to this method.
+    extra_headers: Optional[Dict] = None
+    extra_query: Optional[Dict] = None
+    extra_json: Optional[Dict] = Field(None, alias="extra_body")
+    timeout: Optional[float] = None
+
+    class Config:
+        extra = "allow"
+
+class OpenAIChatInput(OpenAIBaseInput):
+    messages: List[ChatCompletionMessageParam]
+    model: str = get_default_llm()
+    frequency_penalty: Optional[float] = None
+    function_call: Optional[completion_create_params.FunctionCall] = None
+    functions: List[completion_create_params.Function] = None
+    logit_bias: Optional[Dict[str, int]] = None
+    logprobs: Optional[bool] = None
+    max_tokens: Optional[int] = None
+    n: Optional[int] = None
+    presence_penalty: Optional[float] = None
+    response_format: completion_create_params.ResponseFormat = None
+    seed: Optional[int] = None
+    stop: Union[Optional[str], List[str]] = None
+    stream: Optional[bool] = None
+    temperature: Optional[float] = Settings.model_settings.TEMPERATURE
+    tool_choice: Optional[Union[ChatCompletionToolChoiceOptionParam, str]] = None
+    tools: List[Union[ChatCompletionToolParam, str]] = None
+    top_logprobs: Optional[int] = None
+    top_p: Optional[float] = None
+
 
 
 class AgentChatInput(BaseModel):
@@ -123,3 +162,57 @@ class OpenAIBaseOutput(BaseModel):
 
 class OpenAIChatOutput(OpenAIBaseOutput):
     ...
+
+async def openai_request(
+    method, body, extra_json: Dict = {}, header: Iterable = [], tail: Iterable = []
+):
+    """
+    helper function to make openai request with extra fields
+    """
+
+    async def generator():
+        try:
+            for x in header:
+                if isinstance(x, str):
+                    x = OpenAIChatOutput(content=x, object="chat.completion.chunk")
+                elif isinstance(x, dict):
+                    x = OpenAIChatOutput.model_validate(x)
+                else:
+                    raise RuntimeError(f"unsupported value: {header}")
+                for k, v in extra_json.items():
+                    setattr(x, k, v)
+                yield x.model_dump_json()
+
+            async for chunk in await method(**params):
+                for k, v in extra_json.items():
+                    setattr(chunk, k, v)
+                yield chunk.model_dump_json()
+
+            for x in tail:
+                if isinstance(x, str):
+                    x = OpenAIChatOutput(content=x, object="chat.completion.chunk")
+                elif isinstance(x, dict):
+                    x = OpenAIChatOutput.model_validate(x)
+                else:
+                    raise RuntimeError(f"unsupported value: {tail}")
+                for k, v in extra_json.items():
+                    setattr(x, k, v)
+                yield x.model_dump_json()
+        except asyncio.exceptions.CancelledError:
+            logger.warning("streaming progress has been interrupted by user.")
+            return
+        except Exception as e:
+            logger.error(f"openai request error: {e}")
+            yield {"data": json.dumps({"error": str(e)})}
+
+    params = body.model_dump(exclude_unset=True)
+    if params.get("max_tokens") == 0:
+        params["max_tokens"] = Settings.model_settings.MAX_TOKENS
+
+    if hasattr(body, "stream") and body.stream:
+        return EventSourceResponse(generator())
+    else:
+        result = await method(**params)
+        for k, v in extra_json.items():
+            setattr(result, k, v)
+        return result.model_dump()

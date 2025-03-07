@@ -16,6 +16,8 @@ MAX_COMPLETION_TOKENS:
 # LLM通用对话参数
 TEMPERATURE: 0.7
 
+MAX_TOKENS: 2048
+
 # LLM模型配置，包括了不同模态初始化参数。
 # `model` 如果留空则自动使用 DEFAULT_LLM_MODEL
 LLM_MODEL_CONFIG:
@@ -27,7 +29,7 @@ LLM_MODEL_CONFIG:
     prompt_name: default
     callbacks: false
   llm_model:
-    model: ''
+    model: 'gpt-3.5-turbo'
     temperature: 0.9
     max_tokens:
     history_len: 10
